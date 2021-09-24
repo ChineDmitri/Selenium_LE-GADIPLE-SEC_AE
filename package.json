@@ -1,0 +1,29 @@
+{
+  "name": "selenium_le-gadiple-sec_ae",
+  "version": "1.0.0",
+  "description": "For automatisation tasks for \"Attestation employeur destinée à Pôle emploi\"",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ChineDmitri/Selenium_LE-GADIPLE-SEC_AE.git"
+  },
+  "keywords": [
+    "Selenium",
+    "xlsx",
+    "excel"
+  ],
+  "author": "Chine Dmitri <dmitri.chine@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ChineDmitri/Selenium_LE-GADIPLE-SEC_AE/issues"
+  },
+  "homepage": "https://github.com/ChineDmitri/Selenium_LE-GADIPLE-SEC_AE#readme",
+  "dependencies": {
+    "dotenv": "^10.0.0",
+    "selenium-webdriver": "^4.0.0-rc-1",
+    "xlsx": "^0.17.2"
+  }
+}
