@@ -2,7 +2,6 @@
 // --- PACKAGE ---
 const XLSX = require('xlsx');
 const { Builder, By, Key, until } = require('selenium-webdriver');
-const { elementIsSelected } = require('selenium-webdriver/lib/until');
 const dotenv = require("dotenv").config();
 // ---------------
 
@@ -59,7 +58,137 @@ function getTwoDigit(number) {
     return (number < 10 ? '0' : '') + number
 }
 
-/* 
+/*
+CREATION DE ARRAY SOLD
+Composition:
+    [
+        0. Name de tag ou il faut inserer Solde de base mensuel brute,
+        1. Name de tag ou il faut inserer Date de paie salaire
+        2. Date de paie
+        3. Solde de base brut mensuels
+        4. Name de tag nombreTempsTravaillesSalaire_<n>
+        5. Name de tag nombreTempsNonPayesSalaire_<n>
+    ]
+*/
+const sbm = "salaireBrutMensuel_"
+const ddp = "datePaieSalaire_"
+const ntts = "nombreTempsTravaillesSalaire_"
+const ntnps = "nombreTempsNonPayesSalaire_"
+let arrSold = []
+let buffer = []
+
+// creation dernier date si année suivant ou non
+const year = (unitData.date_DJTP.getMonth() + 1) === 12 ? (unitData.date_DJTP.getFullYear() - 2) : (unitData.date_DJTP.getFullYear() - 3)
+const mounth = (unitData.date_DJTP.getMonth() + 1) === 12 ? "01" : getTwoDigit(unitData.date_DJTP.getMonth() + 2)
+buffer.push([
+    (sbm + "1"),
+    (ddp + "1"),
+    ("01/" + mounth + "/" + year),
+    arrUnitData[237][1],
+    (ntts + "1"),
+    (ntnps + "1")
+])
+
+let k = 0; // pas dans le massiv
+console.log(unitData.date_DJTP.getMonth())
+for (let i = 2; i <= 36 + unitData.date_DJTP.getMonth(); i++) {
+
+    if (i < (12 - unitData.date_DJTP.getMonth() + 1)) {
+        // console.log(sbm + i)
+        buffer.push([
+            (sbm + i),
+            (ddp + i),
+            getDataString(arrUnitData[233 - k][1]),
+            arrUnitData[237 - k][1],
+            (ntts + i),
+            (ntnps + i)
+        ])
+        k += 5
+    }
+}
+
+// console.log(buffer)
+buffer.forEach(el => arrSold.push(el)) // ajouté 1 annéé
+// console.log(arrSold)
+// console.log(k)
+
+buffer = [] // netoyage buffer
+
+// console.log(buffer)
+for (let i = 13; i <= 36; i++) {
+    // console.log(sbm + i)
+    // console.log(arrUnitData[237 - k], 237 - k)
+    buffer.push([
+        (sbm + i),
+        (ddp + i),
+        getDataString(arrUnitData[233 - k][1]),
+        arrUnitData[237 - k][1],
+        (ntts + i),
+        (ntnps + i)
+    ])
+    if ((237 - k) <= 122) {
+        k += 7
+    } else {
+        k += 5
+    }
+}
+
+buffer.forEach(el => arrSold.push(el)) // ajouté 2 et 4 année
+
+buffer = [] // netoyage buffer
+
+// console.log(arrSold)
+
+let iw = 36
+while (iw < (36 + unitData.date_DJTP.getMonth())) {
+    iw++
+    // console.log(sbm + iw)
+    // console.log(arrUnitData[237 - k], 237 - k)
+    buffer.push([
+        (sbm + iw),
+        (ddp + iw),
+        getDataString(arrUnitData[233 - k][1]),
+        arrUnitData[237 - k][1],
+        (ntts + iw),
+        (ntnps + iw)
+    ])
+    if ((237 - k) <= 122) {
+        k += 7
+    } else {
+        k += 5
+    }
+}
+
+if (buffer.length !== 0) { // ajouté dernier anné si il y a
+    buffer.forEach(el => arrSold.push(el))
+}
+
+/* arrSold pret! */
+// console.log(arrSold)
+
+/*
+CREATION DE ARRAY SOLD - END
+Arr solde est pret!
+Ex:
+  [
+    'salaireBrutMensuel_36',
+    'datePaieSalaire_36',
+    '01/01/2021',
+    2286.78,
+    'nombreTempsTravaillesSalaire_36',
+    'nombreTempsNonPayesSalaire_36'
+  ],
+  [
+    'salaireBrutMensuel_37',
+    'datePaieSalaire_37',
+    '01/02/2021',
+    2286.78,
+    'nombreTempsTravaillesSalaire_37',
+    'nombreTempsNonPayesSalaire_37'
+  ]
+*/
+
+/*
 START selenium-webdriver
 TODO:
 1. Creation session et auth
@@ -68,18 +197,20 @@ TODO:
 4. ETAP 1
 5. ETAP 2
 6. ETAP 3
+7. ETAP 4
+8. ETAP 5
 */
 const driver = new Builder().forBrowser('firefox').build();
 
 /* 1. Creation session et auth. */
-driver.get('file:///C:/Users/mrdim/Desktop/2.html');
-driver.findElement(By.id('footer_tc_privacy_button_2')).click();
-// driver.get('https://gestion.pole-emploi.fr/espaceemployeur/authentification/authentification/');
-// driver.findElement(By.name('identifiant')).sendKeys(process.env.identifiant)
-// driver.findElement(By.name('codeAcces')).sendKeys(process.env.pass)
-// driver.findElement(By.name('departement')).sendKeys(process.env.dep);
+// driver.get('file:///C:/Users/mrdim/Desktop/2.html');
 // driver.findElement(By.id('footer_tc_privacy_button_2')).click();
-// driver.findElement(By.id('boutonValider')).click();
+driver.get('https://gestion.pole-emploi.fr/espaceemployeur/authentification/authentification/');
+driver.findElement(By.name('identifiant')).sendKeys(process.env.identifiant)
+driver.findElement(By.name('codeAcces')).sendKeys(process.env.pass)
+driver.findElement(By.name('departement')).sendKeys(process.env.dep);
+driver.findElement(By.id('footer_tc_privacy_button_2')).click();
+driver.findElement(By.id('boutonValider')).click();
 
 /* 2. Acceder pour tout les attestation */
 driver.wait(until.titleIs('Espace Employeur - Votre compte'))
@@ -125,11 +256,11 @@ driver.wait(until.titleIs('1 Salarié - Saisie attestation en ligne - Pôle empl
                 driver.findElement(By.css('[value="IRCANTEC"]')).click();
             })
 
-        // // IRCANTEC
-        // driver.wait(driver.findElement(By.id('organismeRetraiteComplementaire')).click())
-        //     .then(() => {
-        //         driver.findElement(By.css('[value="200"]')).click();
-        //     })
+        // Organisme de sécurité sociale
+        driver.wait(driver.findElement(By.id('organismeRetraiteComplementaire')).click())
+            .then(() => {
+                driver.findElement(By.css('[value="200"]')).click();
+            })
 
     })
 
@@ -215,24 +346,101 @@ driver.wait(until.titleIs('2 Emploi - Saisie attestation en ligne - Pôle emploi
 /* 6. ETAP 3 */
 driver.wait(until.titleIs('3 Salaires et primes - Saisie attestation en ligne - Pôle emploi'))
     .then(() => {
+        console.log("Vous avez 10 seconds pour férmer la Pop-Under ;)")
 
-        // driver.wait(
-        //     driver.findElement(By.xpath('/html/body/main/div[1]/form/div[2]/div/div[3]/div/div[6]/section[3]/section[1]/div/div[2]/h3/a')).click())
-        //     .then(() => {
-        //         driver.findElement(By.name("datePaieSalaire_1"))
-        //             .sendKeys("01/" + getTwoDigit(unitData.date_DJTP.getMonth() + 2) + "/" + (unitData.date_DJTP.getFullYear() - 3))
+        setTimeout(() => {
 
-        //         driver.findElement(By.name("salaireBrutMensuel_1")).sendKeys(arrUnitData[237][1])
-        //     })
+            driver.wait(
+                driver.findElement(By.xpath('/html/body/main/div[1]/form/div[2]/div/div[3]/div/div[6]/section[3]/section[1]/div/div[2]/h3/a')).click())
+                .then(() => {
+                    // console.log("yes 1")
+                })
+                .catch(() => {
+                    console.log("no located")
+                })
+
+            driver.wait(
+                driver.findElement(By.xpath('/html/body/main/div[1]/form/div[2]/div/div[3]/div/div[6]/section[3]/section[1]/div/div[3]/h3/a')).click())
+                .then(() => {
+                    // console.log("yes 2")
+                })
+                .catch(() => {
+                    console.log("no located")
+                })
+
+            driver.wait(
+                driver.findElement(By.xpath('/html/body/main/div[1]/form/div[2]/div/div[3]/div/div[6]/section[3]/section[1]/div/div[4]/h3/a')).click())
+                .then(() => {
+                    // console.log("yes 3")
+                })
+                .catch(() => {
+                    console.log("no located")
+                })
+
+            driver.wait(
+                driver.findElement(By.xpath('/html/body/main/div[1]/form/div[2]/div/div[3]/div/div[6]/section[3]/section[1]/div/div[5]/h3/a')).click())
+                .then(() => {
+                    // console.log("yes 4");
 
 
-        // const sbm_tmpl = "salaireBrutMensuel_"
-        // for (let i = 2; i <= 12 - unitData.date_DJTP.getMonth(); i++) {
-        //     let sbm = sbm_tmpl + i.toString();
+                    for (let i = 0; i < arrSold.length; i++) {
+                        driver.findElement(By.name(`${arrSold[i][0]}`)).sendKeys(arrSold[i][3])
+                        driver.findElement(By.name(`${arrSold[i][1]}`)).sendKeys(arrSold[i][2])
 
-        //     driver.findElements(By.name(sbm)).sendKey(arrUnitData[237][1])
+                        // !Depreciated! ERRCONNECTED trop de request
+                        // driver.findElement(By.name(`${arrSold[i][4]}`)).sendKeys(151)
+                        // driver.findElement(By.name(`${arrSold[i][5]}`)).sendKeys(0)
+                    }
 
-        }
+                })
+                .catch(() => {
+                    console.log("no located")
+                })
+
+        }, 11500)
 
     })
 
+
+/* 7. ETAP 4
+pour passe en etape suivant il faut clique manuellement */
+driver.wait(until.titleIs('4 Solde de tout compte - Saisie attestation en ligne - Pôle emploi'))
+    .then(() => {
+        driver.findElement(By.name('datePaiePeriodeSolde')).sendKeys(getDataString(arrUnitData[240][1]));
+
+        driver.findElement(By.name('tempsTravailleSolde')).sendKeys(arrUnitData[246][1].toFixed(2));
+
+        driver.findElement(By.name('tempsNonPayeSolde')).sendKeys(0);
+
+        driver.findElement(By.name('salaireBrutMensuelSolde')).sendKeys(arrUnitData[244][1].toFixed(2));
+    })
+
+
+/* 8. ETAP 5
+pour passe en etape suivant il faut clique manuellement */
+driver.wait(until.titleIs('5 Validation - Saisie attestation en ligne - Pôle emploi'))
+    .then(() => {
+        driver.findElement(By.name('etape5Prenom')).sendKeys("José");
+
+        driver.findElement(By.name('etape5Nom')).sendKeys("de QUINA");
+
+        /* DEPRECIATED 
+        driver.wait(
+            driver.findElement(By.name('qualite')).click())
+            .then(() => {
+                driver.findElement(By.css('[value="06"]')).click();
+            })
+
+        driver.wait(
+            driver.findElement(By.name('etape5motifRupture')).click())
+            .then(() => {
+                driver.findElement(By.css('[value="031"]')).click();
+            })
+        */
+
+        driver.findElement(By.name('personneAJoindreNom')).sendKeys("Nico");
+
+        driver.findElement(By.name('telephone')).sendKeys(112);
+
+        driver.findElement(By.name('lieuSignature')).sendKeys("Aubagne");
+    })

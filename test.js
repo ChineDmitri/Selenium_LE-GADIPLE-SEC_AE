@@ -79,8 +79,6 @@ const arrUnitData = Object.entries(unitData)
 // console.log("01/" + getTwoDigit(unitData.date_DJTP.getMonth() + 2) + "/" + (unitData.date_DJTP.getFullYear() - 3))
 // console.log(arrUnitData[237])
 
-const sbm = "salaireBrutMensuel_"
-
 // console.log(unitData.date_DJTP.getMonth())
 // first mounth
 /* console.log("01/" + getTwoDigit(unitData.date_DJTP.getMonth()) + "/" + (unitData.date_DJTP.getFullYear() - 3))
@@ -97,29 +95,47 @@ console.log(arrUnitData[237]) // dernier sbm */
 CREATION DE ARRAY SOLD
 Composition: 
     [
-        0. Date de paie
-        1. Solde de base brut mensuels
-        2. Name de tag ou il faut inserer Solde de base mensuel brute,
+        0. Name de tag ou il faut inserer Solde de base mensuel brute,
+        1. Name de tag ou il faut inserer Date de paie salaire
+        2. Date de paie
+        3. Solde de base brut mensuels
+        4. Name de tag nombreTempsTravaillesSalaire_<n>
+        5. Name de tag nombreTempsNonPayesSalaire_<n>
     ]
 */
+const sbm = "salaireBrutMensuel_"
+const ddp = "datePaieSalaire_"
+const ntts = "nombreTempsTravaillesSalaire_"
+const ntnps = "nombreTempsNonPayesSalaire_"
 let arrSold = []
 let buffer = []
 
 // creation dernier date si année suivant ou non 
 const year = (unitData.date_DJTP.getMonth() + 1) === 12 ? (unitData.date_DJTP.getFullYear() - 2) : (unitData.date_DJTP.getFullYear() - 3)
 const mounth = (unitData.date_DJTP.getMonth() + 1) === 12 ? "01" : getTwoDigit(unitData.date_DJTP.getMonth() + 2)
-buffer.push([(sbm + "1"), ("01/" + mounth + "/" + year), arrUnitData[237]])
+buffer.push([
+    (sbm + "1"),
+    (ddp + "1"),
+    ("01/" + mounth + "/" + year),
+    arrUnitData[237][1],
+    (ntts + "1"),
+    (ntnps + "1")
+])
 
-
-let colSolde = 237 // idx de 35 Salaires bruts Mensuels
-let colDatePaie = 233 // idx 35 Date de paie
 let k = 0; // pas dans le massiv
 console.log(unitData.date_DJTP.getMonth())
 for (let i = 2; i <= 36 + unitData.date_DJTP.getMonth(); i++) {
 
     if (i < (12 - unitData.date_DJTP.getMonth() + 1)) {
         // console.log(sbm + i)
-        buffer.push([(sbm + i), getDataString(arrUnitData[233 - k][1]), arrUnitData[237 - k]])
+        buffer.push([
+            (sbm + i),
+            (ddp + i),
+            getDataString(arrUnitData[233 - k][1]),
+            arrUnitData[237 - k][1],
+            (ntts + i),
+            (ntnps + i)
+        ])
         k += 5
     }
 }
@@ -135,7 +151,14 @@ buffer = [] // netoyage buffer
 for (let i = 13; i <= 36; i++) {
     // console.log(sbm + i)
     // console.log(arrUnitData[237 - k], 237 - k)
-    buffer.push([(sbm + i), getDataString(arrUnitData[233 - k][1]), arrUnitData[237 - k]])
+    buffer.push([
+        (sbm + i),
+        (ddp + i),
+        getDataString(arrUnitData[233 - k][1]),
+        arrUnitData[237 - k][1],
+        (ntts + i),
+        (ntnps + i)
+    ])
     if ((237 - k) <= 122) {
         k += 7
     } else {
@@ -154,7 +177,14 @@ while (iw < (36 + unitData.date_DJTP.getMonth())) {
     iw++
     // console.log(sbm + iw)
     // console.log(arrUnitData[237 - k], 237 - k)
-    buffer.push([(sbm + iw), getDataString(arrUnitData[233 - k][1]), arrUnitData[237 - k]])
+    buffer.push([
+        (sbm + iw),
+        (ddp + iw),
+        getDataString(arrUnitData[233 - k][1]),
+        arrUnitData[237 - k][1],
+        (ntts + iw),
+        (ntnps + iw)
+    ])
     if ((237 - k) <= 122) {
         k += 7
     } else {
@@ -166,17 +196,34 @@ if (buffer.length !== 0) { // ajouté dernier anné si il y a
     buffer.forEach(el => arrSold.push(el))
 }
 
-console.log(arrSold)
+/* arrSold pret! */
+// console.log(arrSold)
+
+/* TEST pour ETAP 4 */
+// console.log(getDataString(arrUnitData[240][1]))
+// console.log(arrUnitData[246][1].toFixed(2))
+// console.log(arrUnitData[244][1].toFixed(2))
 
 /*
 CREATION DE ARRAY SOLD - END
 Arr solde est pret!
 Ex:
-    [
-        'salaireBrutMensuel_5',
-        [ 'Salaires bruts Mensuels 32', 2164.94 ]
-        '01/07/2018',
-    ]
+  [
+    'salaireBrutMensuel_36',
+    'datePaieSalaire_36',
+    '01/01/2021',
+    2286.78,
+    'nombreTempsTravaillesSalaire_36',
+    'nombreTempsNonPayesSalaire_36'
+  ],
+  [
+    'salaireBrutMensuel_37',
+    'datePaieSalaire_37',
+    '01/02/2021',
+    2286.78,
+    'nombreTempsTravaillesSalaire_37',
+    'nombreTempsNonPayesSalaire_37'
+  ]
 */
 
 // for (let i = 2; i <= 12 - unitData.date_DJTP.getMonth(); i++) {
