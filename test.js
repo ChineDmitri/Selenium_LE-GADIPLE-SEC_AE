@@ -197,12 +197,12 @@ if (buffer.length !== 0) { // ajouté dernier anné si il y a
 }
 
 /* arrSold pret! */
-// console.log(arrSold)
+console.log(arrSold)
 
 /* TEST pour ETAP 4 */
-// console.log(getDataString(arrUnitData[240][1]))
-// console.log(arrUnitData[246][1].toFixed(2))
-// console.log(arrUnitData[244][1].toFixed(2))
+console.log(getDataString(arrUnitData[240][1]))
+console.log(arrUnitData[246][1].toFixed(2))
+console.log(arrUnitData[244][1].toFixed(2))
 
 /*
 CREATION DE ARRAY SOLD - END
