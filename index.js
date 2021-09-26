@@ -20,11 +20,14 @@ const workbook = XLSX.readFile("list.xlsx", {
 
 // get sheet names
 const sheet_name_list = workbook.SheetNames;
-// finally JSON
-const dataJSON = XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]]);
+// finally JSON with defval
+const dataJSON = XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]], { defval: "" });
 
-// personnel with witch we will work
+// personnel with witch we will work (JSON)
 const unitData = dataJSON[idx - 1];
+
+// personnel with witch we will work (TWO-DIMENSIONAL ARRAY)
+const arrUnitData = Object.entries(unitData)
 
 // pour voir emploi Militaire du rang fin de CDD ou Militaire sous-officier fin de CDD
 const emploi = (
@@ -49,6 +52,11 @@ function getDataString(numData) {
 
     // console.log(Intl.DateTimeFormat('fr-FR', options).format(date));
     return Intl.DateTimeFormat("fr-FR", options).format(date);
+}
+
+// function pour obtenir ZERO (0) devant la date (Mounth or Day)
+function getTwoDigit(number) {
+    return (number < 10 ? '0' : '') + number
 }
 
 /* 
@@ -207,7 +215,24 @@ driver.wait(until.titleIs('2 Emploi - Saisie attestation en ligne - Pôle emploi
 /* 6. ETAP 3 */
 driver.wait(until.titleIs('3 Salaires et primes - Saisie attestation en ligne - Pôle emploi'))
     .then(() => {
-        
+
+        // driver.wait(
+        //     driver.findElement(By.xpath('/html/body/main/div[1]/form/div[2]/div/div[3]/div/div[6]/section[3]/section[1]/div/div[2]/h3/a')).click())
+        //     .then(() => {
+        //         driver.findElement(By.name("datePaieSalaire_1"))
+        //             .sendKeys("01/" + getTwoDigit(unitData.date_DJTP.getMonth() + 2) + "/" + (unitData.date_DJTP.getFullYear() - 3))
+
+        //         driver.findElement(By.name("salaireBrutMensuel_1")).sendKeys(arrUnitData[237][1])
+        //     })
+
+
+        // const sbm_tmpl = "salaireBrutMensuel_"
+        // for (let i = 2; i <= 12 - unitData.date_DJTP.getMonth(); i++) {
+        //     let sbm = sbm_tmpl + i.toString();
+
+        //     driver.findElements(By.name(sbm)).sendKey(arrUnitData[237][1])
+
+        }
 
     })
 
